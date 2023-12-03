@@ -1,0 +1,18 @@
+DATASETS:
+  REGISTER:
+    omnilabel_val_lvis_minival:
+      img_dir: "coco/"
+      ann_file: "coco/annotations/lvis_v1.description_omni.json"
+    omnilabel_val_lvis_selected:
+      img_dir: "coco/"
+      ann_file: "coco/annotations/lvis_v1.description_omni.selected.json"
+    omnilabel_val_lvis_auto:
+      img_dir: "coco/"
+      ann_file: "coco/annotations/lvis_v1.description_omni.auto.json"
+    omnilabel_val_flickr:
+      img_dir: "flickr30k/flickr30k_images/val/"
+      ann_file: "mdetr_annotations/final_flickr_separateGT_val.v1.25-0.omnilabel.json"
+  TEST: ("omnilabel_val",)
+  # TEST: ("omnilabel_val_coco",)
+DATALOADER:
+  ASPECT_RATIO_GROUPING: False

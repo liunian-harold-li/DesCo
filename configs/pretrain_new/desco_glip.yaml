@@ -1,0 +1,134 @@
+# for final GLIP tiny, pre-trained from scratch
+MODEL:
+  META_ARCHITECTURE: "GeneralizedVLRCNN"
+  WEIGHT: "MODEL/swin_tiny_patch4_window7_224.pth"
+  RPN_ONLY: True
+  RPN_ARCHITECTURE: "VLDYHEAD"
+
+  BACKBONE:
+    CONV_BODY: "SWINT-FPN-RETINANET"
+    OUT_CHANNELS: 256
+
+  LANGUAGE_BACKBONE:
+    FREEZE: False
+    MODEL_TYPE: "bert-base-uncased" # "roberta-base", "clip"
+    MASK_SPECIAL: False
+
+  RPN:
+    USE_FPN: True
+    ANCHOR_SIZES: (64, 128, 256, 512, 1024)
+    ANCHOR_STRIDE: (8, 16, 32, 64, 128)
+    ASPECT_RATIOS: (1.0,)
+    SCALES_PER_OCTAVE: 1
+
+  DYHEAD:
+    CHANNELS: 256
+    NUM_CONVS: 6
+    USE_GN: True
+    USE_DYRELU: True
+    USE_DFCONV: True
+    USE_DYFUSE: True
+    TOPK: 9 # topk for selecting candidate positive samples from each level
+    SCORE_AGG: "MEAN"
+    LOG_SCALE: 0.0
+    USE_CHECKPOINT: True
+    FUSE_CONFIG:
+      EARLY_FUSE_ON: True
+      TYPE: "MHA-B"   # "MHA-B", "MHA-S", "FILM", "SCAN", "NONE"
+      USE_CLASSIFICATION_LOSS: False
+      USE_TOKEN_LOSS: False
+      USE_CONTRASTIVE_ALIGN_LOSS: False
+      CONTRASTIVE_HIDDEN_DIM: 64
+      USE_DOT_PRODUCT_TOKEN_LOSS: True
+      USE_FUSED_FEATURES_DOT_PRODUCT: True
+      USE_LAYER_SCALE: True
+      CLAMP_MIN_FOR_UNDERFLOW: True
+      CLAMP_MAX_FOR_OVERFLOW: True
+      CLAMP_BERTATTN_MIN_FOR_UNDERFLOW: True
+      CLAMP_BERTATTN_MAX_FOR_OVERFLOW: True
+      CLAMP_DOT_PRODUCT: True
+
+# use for grounding model
+DATASETS:
+  REGISTER:
+    bing_caption_train:
+      yaml_path: "GCC/CC3M/yamls"
+      yaml_name: "tiny.noun.harsh"
+      yaml_name_no_coco: "tiny.noun.harsh"
+    mixed_train_no_coco_noun_gpt_0425:
+      coco_img_dir: "coco/train2014"
+      vg_img_dir: "gqa/images"
+      ann_file: "mdetr_annotations/final_mixed_train_no_coco_with_nouns_gpt.0425.json"
+    flickr30k_train_gpt_0425:
+      img_folder: "flickr30k/flickr30k_images/train"
+      ann_file: "mdetr_annotations/final_flickr_separateGT_train_gpt.0425.json"
+      is_train: True
+
+  CAPTION_CONF: 0.4
+
+  CAPTION_AUGMENTATION_VERSION: "mixed.v4-v3.5-4-1.drop_positive.control_pos.grouping.v1" # for GoldG data; used by CaptionAugmentation to determine how to perform the augmentation
+  OD_TO_GROUNDING_VERSION: "description.gpt.v10.mixed.allow_zero.v1" # for
+  CC_CAPTION_AUGMENTATION_VERSION: "mixed.v3.8-2.drop_positive.control_pos.grouping.v1" # for CC data; used by CaptionAugmentation to determine how to perform the augmentation
+  CAPTION_VOCAB_FILE: "tools/files/mixed_vocab.v1.tmp0.davincci.chunk1of1.filtered.json"
+  DESCRIPTION_FILE: "tools/files/o365.description.v1.json"
+
+  TRAIN:  ("mixed_train_no_coco_noun_gpt_0425", "flickr30k_train_gpt_0425", "object365_dt_train", ) # bing_caption_train_no_coco
+  TEST: ("coco_2017_val", )
+  BING_INDEX_LIST: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  # BING_INDEX_LIST: [ 0, 1, ]
+  ONE_HOT: False
+  FLICKR_COPY: 2
+  MIXED_COPY: 2
+  OBJECT365_COPY: 1
+  DISABLE_SHUFFLE: False
+  ADD_DET_PROMPT: False
+  RANDOM_SAMPLE_NEG: 85
+  CONTROL_PROB: (0.0, 0.0, 0.5, 0.0)
+  FURTHER_SCREEN: True
+
+  CAPTION_NMS: -1.0
+  CAPTION_MIN_BOX: 1
+
+  SEPARATION_TOKENS: ". "
+
+  PACK_RANDOM_CAPTION_NUMBER: 20
+  NO_RANDOM_PACK_PROBABILITY: 0.4
+  RANDOM_PACK_PROB: 0.5
+  CAPTION_FORMAT_VERSION: "v2"
+
+
+INPUT:
+  PIXEL_MEAN: [ 103.530, 116.280, 123.675 ]
+  PIXEL_STD: [ 57.375, 57.120, 58.395 ]
+  MIN_SIZE_TRAIN: 800
+  MAX_SIZE_TRAIN: 1333
+  MIN_SIZE_TEST: 800
+  MAX_SIZE_TEST: 1333
+
+AUGMENT:
+  MULT_MIN_SIZE_TRAIN: (480,560,640,720,800)
+
+DATALOADER:
+  SIZE_DIVISIBILITY: 32
+  DISTRIBUTE_CHUNK_AMONG_NODE: False
+
+SOLVER:
+  OPTIMIZER: ADAMW
+  BASE_LR: 0.0001
+  LANG_LR: 0.00001
+  WEIGHT_DECAY: 0.0001
+  STEPS: (0.67, 0.89)
+  #MAX_EPOCH: 12
+  MAX_ITER: 300000
+  IMS_PER_BATCH: 64
+  WARMUP_ITERS: 2000
+  WARMUP_FACTOR: 0.001
+  USE_AMP: True
+  MODEL_EMA: 0.999
+  FIND_UNUSED_PARAMETERS: False
+
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_TYPE: "full_model"
+    CLIP_VALUE: 1.0
+    NORM_TYPE: 2.0
