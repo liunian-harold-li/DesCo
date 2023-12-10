@@ -1,6 +1,8 @@
 # DesCo
 This is the code for the paper [DesCo: Learning Object Recognition with Rich Language Descriptions (NeurIPS 2023)](https://arxiv.org/pdf/2306.14060.pdf).
 
+Checkout the huggingface demo at [link](https://huggingface.co/spaces/zdou0830/desco).
+
 ## Installation and Setup
 
 ***Environment***
