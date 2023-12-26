@@ -330,41 +330,41 @@ def main():
     # get the wandb name
     train_wandb_name = os.path.basename(cfg.OUTPUT_DIR)
     eval_wandb_name = train_wandb_name + "_eval" + "_Fixed{}_Chunk{}".format(not cfg.DATASETS.LVIS_USE_NORMAL_AP, cfg.TEST.CHUNKED_EVALUATION)
-    if is_main_process() and train_wandb_name != "__test__":
-        api = wandb.Api()
-        runs = api.runs('haroldli/language_det_eval')
-        matched_run = None
-        history = []
-        exclude_keys = ['_runtime', '_timestamp']
-        for run in runs:
-            if run.name == eval_wandb_name and str(run._state) == "finished":
-                print("run found", run.name)
-                print(run.summary)
-                matched_run = run
-                run_his = matched_run.scan_history()
-                #print([len(i) for i in run_his])
+    # if is_main_process() and train_wandb_name != "__test__":
+    #     api = wandb.Api()
+    #     runs = api.runs('haroldli/language_det_eval')
+    #     matched_run = None
+    #     history = []
+    #     exclude_keys = ['_runtime', '_timestamp']
+    #     for run in runs:
+    #         if run.name == eval_wandb_name and str(run._state) == "finished":
+    #             print("run found", run.name)
+    #             print(run.summary)
+    #             matched_run = run
+    #             run_his = matched_run.scan_history()
+    #             #print([len(i) for i in run_his])
 
-                for stat in run_his:
-                    stat_i = {k: v for k, v in stat.items() if k not in exclude_keys and v is not None}
-                    if len(stat_i) > 1:
-                        history.append(stat_i)
-                #matched_run.delete()
-                break # only update one
-        wandb_run = wandb.init(
-            project = 'language_det_eval',
-            job_type = 'evaluate',
-            name = eval_wandb_name,
-        )
-        #pprint(history)
-        # exclude_keys = ['_step', '_runtime', '_timestamp']
-        # for stat in history:
-        #     wandb.log(
-        #         {k: v for k, v in stat.items() if k not in exclude_keys},
-        #         step = stat['_step'],
-        #     )
-    else:
-        wandb_run = None
-        history = None
+    #             for stat in run_his:
+    #                 stat_i = {k: v for k, v in stat.items() if k not in exclude_keys and v is not None}
+    #                 if len(stat_i) > 1:
+    #                     history.append(stat_i)
+    #             #matched_run.delete()
+    #             break # only update one
+    #     wandb_run = wandb.init(
+    #         project = 'language_det_eval',
+    #         job_type = 'evaluate',
+    #         name = eval_wandb_name,
+    #     )
+    #     #pprint(history)
+    #     # exclude_keys = ['_step', '_runtime', '_timestamp']
+    #     # for stat in history:
+    #     #     wandb.log(
+    #     #         {k: v for k, v in stat.items() if k not in exclude_keys},
+    #     #         step = stat['_step'],
+    #     #     )
+    # else:
+    wandb_run = None
+    history = None
     print("weight_iter: ", weight_iter)
     print("train_wandb_name: ", train_wandb_name)
     print("eval_wandb_name: ", eval_wandb_name)
