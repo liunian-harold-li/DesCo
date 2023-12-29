@@ -107,7 +107,7 @@ Useful notes:
 - `TEST.IMS_PER_BATCH` should be equal to `GPU_NUM`; the current evaluation script only supports inference on 1 image per GPU.
 - Since there are over 1000 categories in  `TEST.CHUNKED_EVALUATION` specifies how many categories we put into one prompt. Thus, we need to run the model multiple times for one image with different prompts. We recommend evaluating with 8 GPUs and evaluating on `minival` takes several hours.
 - `DATASETS.OD_TO_GROUNDING_VERSION` specifies how we convert the category names into descriptions. It is used in `data/dataset/_od_to_description.py`.
-- The default evaluation protocal uses the [fixed AP](https://github.com/achalddave/large-vocab-devil).
+- The default evaluation protocol uses the [fixed AP](https://github.com/achalddave/large-vocab-devil).
 
 
 ### OmniLabel
